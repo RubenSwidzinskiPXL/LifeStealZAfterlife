@@ -1,7 +1,7 @@
 name: LifeStealZ
 version: '${project.version}'
 main: com.zetaplugins.lifestealz.LifeStealZ
-api-version: '1.19'
+api-version: '1.21'
 author: Kartoffelchipss
 website: https://zetaplugins.com/
 description: The Ultimate LifeSteal SMP Plugin!
@@ -58,6 +58,24 @@ permissions:
         default: op
     lifestealz.admin.debug:
         description: access debug commands
+        default: op
+    lifestealz.admin.afterlife.generate:
+        description: generate or initialize the afterlife world
+        default: op
+    lifestealz.admin.afterlife.tp:
+        description: teleport to the afterlife world
+        default: op
+    lifestealz.admin.afterlife.regen:
+        description: regenerate the afterlife world (delete & recreate)
+        default: op
+    lifestealz.admin.afterlife.info:
+        description: view afterlife world status
+        default: op
+    lifestealz.admin.afterlife.invload:
+        description: load a stored inventory profile for a player
+        default: op
+    lifestealz.admin.afterlife.invclear:
+        description: clear a stored inventory profile for a player
         default: op
     lifestealz.bypassrevivelimit:
         description: bypass the player revive limit

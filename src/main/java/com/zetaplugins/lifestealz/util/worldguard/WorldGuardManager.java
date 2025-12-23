@@ -2,6 +2,8 @@ package com.zetaplugins.lifestealz.util.worldguard;
 
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.flags.StateFlag;
+import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import com.zetaplugins.lifestealz.LifeStealZ;
 
@@ -13,9 +15,24 @@ public final class WorldGuardManager {
     }
 
     private void registerFlags() {
+        FlagRegistry registry = WorldGuard.getInstance().getFlagRegistry();
+        StateFlag existing = (StateFlag) registry.get("heartloss");
+        if (existing != null) {
+            HEARTLOSS_FLAG = existing;
+            return;
+        }
+
         StateFlag heartLossFlag = new HeartLossFlag();
-        WorldGuard.getInstance().getFlagRegistry().register(heartLossFlag);
-        HEARTLOSS_FLAG = heartLossFlag;
+        try {
+            registry.register(heartLossFlag);
+            HEARTLOSS_FLAG = heartLossFlag;
+        } catch (IllegalStateException e) {
+            // Likely a hot-reload scenario where WG blocks new flag registration
+            HEARTLOSS_FLAG = (StateFlag) registry.get("heartloss");
+            if (HEARTLOSS_FLAG == null) {
+                Bukkit.getLogger().warning("[LifeStealZ] Failed to register WorldGuard flag 'heartloss' (hot reload). Region heart-loss checks will be skipped.");
+            }
+        }
     }
 
     public StateFlag getHeartLossFlag() {

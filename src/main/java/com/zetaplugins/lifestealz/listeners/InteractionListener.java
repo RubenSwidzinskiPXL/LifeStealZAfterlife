@@ -139,6 +139,17 @@ public final class InteractionListener implements Listener {
             ));
             return;
         }
+        
+        // Check if player is in afterlife
+        PlayerData playerData = plugin.getStorage().load(player.getUniqueId());
+        if (plugin.getConfig().getBoolean("afterlife.enabled", false) && playerData != null && playerData.isAfterlife()) {
+            player.sendMessage(MessageUtils.getAndFormatMsg(
+                    false,
+                    "noHeartUseInAfterlife",
+                    "&cYou cannot use hearts in the Afterlife!"
+            ));
+            return;
+        }
 
         if (restrictedHeartByGracePeriod(player)) {
             player.sendMessage(MessageUtils.getAndFormatMsg(
@@ -154,8 +165,6 @@ public final class InteractionListener implements Listener {
             player.sendMessage(MessageUtils.getAndFormatMsg(false, "heartconsumeCooldown", "&cYou have to wait before using another heart!"));
             return;
         }
-
-        PlayerData playerData = plugin.getStorage().load(player.getUniqueId());
 
         Integer savedHeartAmountInteger = item.getItemMeta().getPersistentDataContainer().has(CustomItemManager.CUSTOM_HEART_VALUE_KEY, PersistentDataType.INTEGER) ? item.getItemMeta().getPersistentDataContainer().get(CustomItemManager.CUSTOM_HEART_VALUE_KEY, PersistentDataType.INTEGER) : 1;
         int savedHeartAmount = savedHeartAmountInteger != null ? savedHeartAmountInteger : 1;

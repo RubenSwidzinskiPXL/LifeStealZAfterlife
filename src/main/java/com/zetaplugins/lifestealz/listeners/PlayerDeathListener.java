@@ -23,6 +23,8 @@ import com.zetaplugins.lifestealz.LifeStealZ;
 import com.zetaplugins.lifestealz.util.customitems.CustomItemManager;
 import com.zetaplugins.lifestealz.storage.PlayerData;
 import com.zetaplugins.lifestealz.util.worldguard.WorldGuardManager;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextReplacementConfig;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -56,6 +58,14 @@ public final class PlayerDeathListener implements Listener {
             playerUUID = (UUID) player.getMetadata("combat_log_npc").get(0).value();
         }
         final PlayerData playerData = plugin.getStorage().load(playerUUID);
+
+        // Prevent heart loss in afterlife world
+        if (plugin.getConfig().getBoolean("afterlife.enabled", false)) {
+            if (playerData != null && playerData.isAfterlife()) {
+                // Player died in afterlife - just respawn them, no heart loss
+                return;
+            }
+        }
 
         final boolean isDeathByPlayer = killer != null && !killer.getUniqueId().equals(playerUUID);
 
@@ -312,6 +322,27 @@ public final class PlayerDeathListener implements Listener {
                         dropHeartsNaturally(player.getLocation(), (int) (healthToLoose / 2), CustomItemManager.createNaturalDeathHeart());
                     }
                 }
+            }
+
+            // Afterlife takes precedence over bans or revive-respawn logic
+            if (plugin.getConfig().getBoolean("afterlife.enabled", false)) {
+                // Send to afterlife instead of banning or respawning
+                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> plugin.getAfterlifeManager().sendPlayerToAfterlife(player), 1L);
+
+                // Announce entering afterlife
+                if (eliminationEvent.isShouldAnnounceElimination()) {
+                    Component afterlifeMessage = eliminationEvent.getEliminationMessage()
+                            .replaceText(TextReplacementConfig.builder()
+                                    .matchLiteral("eliminated")
+                                    .replacement("sent to the Afterlife")
+                                    .build());
+                    Bukkit.broadcast(afterlifeMessage);
+                    event.setDeathMessage(null);
+                }
+
+                // Send webhook
+                plugin.getWebHookManager().sendWebhookMessage(WebHookManager.WebHookType.ELIMINATION, player.getName(), killer != null ? killer.getName() : "");
+                return;
             }
 
             if (!eliminationEvent.isShouldBanPlayer()) {

@@ -118,13 +118,18 @@ public final class ReviveCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Checks if the player is eligible for a revive (e.g. has been eliminated)
+     * Checks if the player is eligible for a revive (e.g. has been eliminated or in afterlife)
      * @param sender The command sender
      * @param playerData The player data of the player to be revived
      * @return True if the player is eligible for a revive, false otherwise
      */
     private boolean isEligibleForRevive(CommandSender sender, PlayerData playerData) {
         int minHearts = plugin.getConfig().getInt("minHearts");
+        
+        // Allow reviving players in afterlife
+        if (plugin.getConfig().getBoolean("afterlife.enabled", false) && playerData.isAfterlife()) {
+            return true;
+        }
 
         return !(playerData.getMaxHealth() > minHearts * 2);
     }
@@ -136,8 +141,20 @@ public final class ReviveCommand implements CommandExecutor, TabCompleter {
      * @param playerData The player data of the player to be revived
      */
     private void revivePlayer(CommandSender sender, String targetPlayerName, PlayerData playerData) {
+        // Check if player is in afterlife and release them if afterlife is enabled
+        if (plugin.getConfig().getBoolean("afterlife.enabled", false) && playerData.isAfterlife()) {
+            // If the player is online, release them from afterlife
+            org.bukkit.entity.Player onlinePlayer = plugin.getServer().getPlayer(targetPlayerName);
+            if (onlinePlayer != null && onlinePlayer.isOnline()) {
+                plugin.getAfterlifeManager().releaseFromAfterlife(onlinePlayer);
+                return; // Release method already saves data
+            }
+        }
+        
+        // Standard revive for eliminated players
         playerData.setMaxHealth(plugin.getConfig().getDouble("reviveHearts") * 2);
         playerData.setHasBeenRevived(playerData.getHasBeenRevived() + 1);
+        playerData.setLifeState(com.zetaplugins.lifestealz.afterlife.LifeState.ALIVE);
         plugin.getStorage().save(playerData);
         plugin.getEliminatedPlayersCache().removeEliminatedPlayer(targetPlayerName);
 

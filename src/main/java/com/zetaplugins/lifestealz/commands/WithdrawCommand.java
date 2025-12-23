@@ -39,6 +39,17 @@ public final class WithdrawCommand implements CommandExecutor, TabCompleter {
             return false;
         }
 
+        // Check if player is in afterlife
+        PlayerData playerData = plugin.getStorage().load(player.getUniqueId());
+        if (plugin.getConfig().getBoolean("afterlife.enabled", false) && playerData != null && playerData.isAfterlife()) {
+            sender.sendMessage(MessageUtils.getAndFormatMsg(
+                    false,
+                    "noWithdraw",
+                    "&cYou cannot withdraw hearts while in the Afterlife!"
+            ));
+            return false;
+        }
+        
         boolean isInGracePeriod = plugin.getGracePeriodManager().isInGracePeriod(player);
         boolean allowWithdrawInGrace = plugin.getConfig().getBoolean("gracePeriod.allowWithdraw", false);
         if (isInGracePeriod && !allowWithdrawInGrace) {

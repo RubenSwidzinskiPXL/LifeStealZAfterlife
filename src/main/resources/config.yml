@@ -205,13 +205,25 @@ antiAlt:
   # If the anti alt system should be enabled
   enabled: true
   # If possible alt kill attempts should be logged
+  fixed-hearts: 10
   logAttempt: true
   # If possible alt kill attempts should be prevented
   preventKill: false
   # If a message should be sent to the player, when an alt kill attempt is detected
   sendMessage: false
   # Add custom comamnds, to be executed when a possible alt kill attempt is detected
-  # You can use &player& to insert the player name (commands are executed for both players)
+  # World generation
+  generator: "default"   # options: default | void | island
+  seed: ~                 # optional numeric seed; leave null/~ for random
+  spawn-y: 65             # spawn height for the world
+  void:
+    platform-y: 64
+    platform-size: 7
+  island:
+    radius: 64
+    height: 64
+  # Chat
+  # chat-prefix: "§8[AFTERLIFE] §7"   # deprecated; use afterlifeDeathTag in lang and renderer
   commands:
     # - "say Please don't kill alts"
     # - "ban &player& 1h"
@@ -223,3 +235,58 @@ webhook:
   revive: false
   # The URL of the webhook
   url: ""
+
+# === AFTERLIFE SETTINGS ===
+# The afterlife system sends players to a separate world instead of banning them when they reach 0 hearts.
+# They can be released after a timer expires, through revive crystals, or other means.
+afterlife:
+  # Enable the afterlife system (if disabled, players will be banned normally)
+  enabled: false
+  # How long (in seconds) players stay in the afterlife before being automatically released
+  # 3600 = 1 hour, 7200 = 2 hours, 86400 = 24 hours
+  duration-seconds: 3600
+  # Number of hearts to give players when they are released from the afterlife
+  revive-hearts: 10
+  # Name of the afterlife world (will be created if it doesn't exist)
+  world-name: "afterlife"
+  # Name of the world players return to after being released
+  return-world: "world"
+  # Size of the world border in the afterlife (256 = 256x256 area)
+  border-size: 256
+  # Environment of the afterlife world: NORMAL or NETHER
+  # NETHER uses the vanilla nether generator and ignores custom generator below
+  environment: "NORMAL"
+  # Allow PvP in the afterlife world
+  allow-pvp: false
+  # Allow mob spawning in the afterlife world
+  mob-spawning: true
+  # Clear player inventory when entering afterlife
+  clear-inventory: true
+  # Keep inventories separate between main and afterlife worlds
+  separate-inventories: true
+  # Optional: custom entry message when sent to the afterlife (MiniMessage supported)
+  # Placeholders: %time%
+  enter-message: ""
+  # NOTE: Death tag is customizable in language files (afterlifeDeathTag)
+  # Chat format: [☠] <rank/prefix> PlayerName: message (all in dark grey)
+  # This preserves compatibility with chat plugins like LuckPerms, Vault, EssentialsX Chat
+  # Commands that players can use while in the afterlife
+  allowed-commands:
+    - "/spawn"
+    - "/help"
+    - "/msg"
+    - "/r"
+    - "/whisper"
+    - "/tell"
+  # World generation options for NORMAL environment
+  # For NETHER environment, vanilla generator is used and these are ignored
+  generator: "default"   # options: default | void | island
+  seed: ~                 # optional numeric seed; leave null/~ for random
+  spawn-y: 65             # spawn height for the world
+  void:
+    platform-y: 64
+    platform-size: 7
+  island:
+    radius: 64
+    height: 64
+  # End portals are disabled for afterlife players

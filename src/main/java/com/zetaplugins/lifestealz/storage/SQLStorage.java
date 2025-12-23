@@ -33,7 +33,9 @@ public abstract class SQLStorage extends Storage {
                         .append("craftedHearts SMALLINT UNSIGNED NOT NULL DEFAULT 0, ")
                         .append("craftedRevives SMALLINT UNSIGNED NOT NULL DEFAULT 0, ")
                         .append("killedOtherPlayers MEDIUMINT UNSIGNED NOT NULL DEFAULT 0, ")
-                        .append("firstJoin BIGINT UNSIGNED NOT NULL")
+                        .append("firstJoin BIGINT UNSIGNED NOT NULL, ")
+                        .append("lifeState VARCHAR(16) NOT NULL DEFAULT 'ALIVE', ")
+                        .append("afterlifeReleaseTime BIGINT NOT NULL DEFAULT 0")
                         .append(");");
                 statement.executeUpdate(sql.toString());
 
@@ -96,6 +98,20 @@ public abstract class SQLStorage extends Storage {
         playerData.setCraftedRevives(resultSet.getInt("craftedRevives"));
         playerData.setKilledOtherPlayers(resultSet.getInt("killedOtherPlayers"));
         playerData.setFirstJoin(resultSet.getLong("firstJoin"));
+        
+        // Load afterlife fields
+        try {
+            String lifeStateStr = resultSet.getString("lifeState");
+            playerData.setLifeState(com.zetaplugins.lifestealz.afterlife.LifeState.valueOf(lifeStateStr));
+        } catch (Exception e) {
+            playerData.setLifeState(com.zetaplugins.lifestealz.afterlife.LifeState.ALIVE);
+        }
+        try {
+            playerData.setAfterlifeReleaseTime(resultSet.getLong("afterlifeReleaseTime"));
+        } catch (Exception e) {
+            playerData.setAfterlifeReleaseTime(0L);
+        }
+        
         playerData.clearModifiedFields();
         return playerData;
     }
@@ -147,8 +163,8 @@ public abstract class SQLStorage extends Storage {
      * @return True if the insert was successful, false otherwise
      */
     private boolean insertPlayerData(Connection connection, PlayerData playerData) {
-        final String insertQuery = "INSERT INTO hearts (uuid, name, maxhp, hasbeenRevived, craftedHearts, craftedRevives, killedOtherPlayers, firstJoin) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        final String insertQuery = "INSERT INTO hearts (uuid, name, maxhp, hasbeenRevived, craftedHearts, craftedRevives, killedOtherPlayers, firstJoin, lifeState, afterlifeReleaseTime) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement insertStmt = connection.prepareStatement(insertQuery)) {
             insertStmt.setString(1, playerData.getUuid());
@@ -159,6 +175,8 @@ public abstract class SQLStorage extends Storage {
             insertStmt.setInt(6, playerData.getCraftedRevives());
             insertStmt.setInt(7, playerData.getKilledOtherPlayers());
             insertStmt.setLong(8, playerData.getFirstJoin());
+            insertStmt.setString(9, playerData.getLifeState().name());
+            insertStmt.setLong(10, playerData.getAfterlifeReleaseTime());
             insertStmt.executeUpdate();
 
             playerData.clearModifiedFields();
@@ -200,6 +218,12 @@ public abstract class SQLStorage extends Storage {
                     break;
                 case "firstJoin":
                     params.add(playerData.getFirstJoin());
+                    break;
+                case "lifeState":
+                    params.add(playerData.getLifeState().name());
+                    break;
+                case "afterlifeReleaseTime":
+                    params.add(playerData.getAfterlifeReleaseTime());
                     break;
             }
         }
@@ -273,7 +297,9 @@ public abstract class SQLStorage extends Storage {
                                 resultSet.getInt("craftedHearts") + CSV_SEPARATOR +
                                 resultSet.getInt("craftedRevives") + CSV_SEPARATOR +
                                 resultSet.getInt("killedOtherPlayers") + CSV_SEPARATOR +
-                                resultSet.getLong("firstJoin");
+                                resultSet.getLong("firstJoin") + CSV_SEPARATOR +
+                                resultSet.getString("lifeState") + CSV_SEPARATOR +
+                                resultSet.getLong("afterlifeReleaseTime");
                         writer.write(line);
                         writer.newLine();
                     }
@@ -312,8 +338,8 @@ public abstract class SQLStorage extends Storage {
                 while ((line = reader.readLine()) != null) {
                     String[] data = line.split(CSV_SEPARATOR);
 
-                    if (data.length != 8) {
-                        getPlugin().getLogger().severe("Invalid CSV format. Expected 8 columns, but got " + data.length);
+                    if (data.length != 10) {
+                        getPlugin().getLogger().severe("Invalid CSV format. Expected 10 columns, but got " + data.length);
                         continue;
                     }
 
@@ -327,6 +353,8 @@ public abstract class SQLStorage extends Storage {
                     statement.setInt(6, Integer.parseInt(data[5])); // craftedRevives
                     statement.setInt(7, Integer.parseInt(data[6])); // killedOtherPlayers
                     statement.setLong(8, Long.parseLong(data[7])); // firstJoin
+                    statement.setString(9, data[8]); // lifeState
+                    statement.setLong(10, Long.parseLong(data[9])); // afterlifeReleaseTime
 
                     statement.addBatch();
                     batchSize++;

@@ -45,6 +45,7 @@ public final class MainTabCompleter implements TabCompleter {
         if (sender.hasPermission("lifestealz.help")) options.add("help");
         if (sender.hasPermission("lifestealz.managedata")) options.add("data");
         if (sender.hasPermission("lifestealz.graceperiod")) options.add("graceperiod");
+        if (sender.hasPermission("lifestealz.admin.afterlife.generate") || sender.hasPermission("lifestealz.admin.afterlife.tp") || sender.hasPermission("lifestealz.admin.afterlife.regen") || sender.hasPermission("lifestealz.admin.afterlife.info")) options.add("afterlife");
 
         return getDisplayOptions(options, input);
     }
@@ -52,6 +53,8 @@ public final class MainTabCompleter implements TabCompleter {
     private List<String> getSecondArgOptions(CommandSender sender, String[] args) {
         String input = args[1].toLowerCase();
         switch (args[0]) {
+            case "afterlife":
+                return getDisplayOptions(List.of("generate", "tp", "regen", "info", "invload", "invclear"), input);
             case "hearts":
                 return getDisplayOptions(List.of("add", "set", "remove", "get"), input);
             case "giveItem":
@@ -76,6 +79,14 @@ public final class MainTabCompleter implements TabCompleter {
     private List<String> getThirdArgOptions(CommandSender sender, String[] args) {
         String input = args[2].toLowerCase();
         switch (args[0]) {
+            case "afterlife":
+                if ("regen".equalsIgnoreCase(args[1])) {
+                    return getDisplayOptions(List.of("confirm"), input);
+                }
+                if ("invload".equalsIgnoreCase(args[1]) || "invclear".equalsIgnoreCase(args[1])) {
+                    return getDisplayOptions(getPlayersTabCompletion(true, plugin), input);
+                }
+                return List.of();
             case "hearts":
                 if ("get".equals(args[1])) return getDisplayOptions(getOfflinePlayersTabCompletion(false, true, plugin), input);
                 return getDisplayOptions(getOfflinePlayersTabCompletion(true, true, plugin), input);
@@ -96,6 +107,9 @@ public final class MainTabCompleter implements TabCompleter {
     private List<String> getFourthArgOptions(String[] args) {
         if ("hearts".equals(args[0]) || "giveItem".equals(args[0])) {
             return List.of("1", "32", "64");
+        }
+        if ("afterlife".equals(args[0]) && ("invload".equalsIgnoreCase(args[1]) || "invclear".equalsIgnoreCase(args[1]))) {
+            return List.of("main", "afterlife");
         }
         return List.of();
     }

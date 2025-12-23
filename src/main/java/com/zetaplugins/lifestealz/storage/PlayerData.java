@@ -1,5 +1,7 @@
 package com.zetaplugins.lifestealz.storage;
 
+import com.zetaplugins.lifestealz.afterlife.LifeState;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -13,6 +15,8 @@ public class PlayerData {
     private int hasBeenRevived;
     private int killedOtherPlayers;
     private long firstJoin;
+    private LifeState lifeState = LifeState.ALIVE;
+    private long afterlifeReleaseTime = 0L;
 
     private final Set<String> modifiedFields = new HashSet<>(); // Track modified fields
 
@@ -93,6 +97,40 @@ public class PlayerData {
             this.firstJoin = firstJoin;
             modifiedFields.add("firstJoin");
         }
+    }
+
+    public LifeState getLifeState() {
+        return lifeState;
+    }
+
+    public void setLifeState(LifeState lifeState) {
+        if (this.lifeState != lifeState) {
+            this.lifeState = lifeState;
+            modifiedFields.add("lifeState");
+        }
+    }
+
+    public long getAfterlifeReleaseTime() {
+        return afterlifeReleaseTime;
+    }
+
+    public void setAfterlifeReleaseTime(long afterlifeReleaseTime) {
+        if (this.afterlifeReleaseTime != afterlifeReleaseTime) {
+            this.afterlifeReleaseTime = afterlifeReleaseTime;
+            modifiedFields.add("afterlifeReleaseTime");
+        }
+    }
+
+    public boolean isAfterlife() {
+        return lifeState == LifeState.AFTERLIFE;
+    }
+
+    public boolean isEliminated() {
+        return lifeState == LifeState.ELIMINATED;
+    }
+
+    public boolean isAlive() {
+        return lifeState == LifeState.ALIVE;
     }
 
     public boolean hasChanges() {

@@ -36,6 +36,9 @@ LifeStealZ offers a great amount of admin tools and is highly customizable. You 
 * ✅ PlaceholderAPI placeholders
 * ✅ Custom WorldGuard flags
 * ✅ Admin commands
+* ✅ Afterlife system with admin world controls (generate, visit, regenerate)
+* ✅ Afterlife environment options (Overworld or Nether with 256×256 border)
+* ✅ Separate inventories between afterlife and main worlds
 * ✅ HEX colors and gradients support
 * ✅ SQLite and MySQL support
 
@@ -74,6 +77,12 @@ LifeStealZ offers a great amount of admin tools and is highly customizable. You 
 - **lifestealz.help** - Allow a player to access the help menu (true by default)
 - **lifestealz.viewhearts** - Allow a player to view the amount of hearts (`/hearts`) he has (true by default)
 - **lifestealz.maxhearts.[amount]** - Set the max hearts for a player. This overwrites the maxHearts in the config
+- **lifestealz.admin.afterlife.generate** - Generate or initialize the afterlife world
+- **lifestealz.admin.afterlife.tp** - Teleport/visit the afterlife world
+- **lifestealz.admin.afterlife.regen** - Regenerate (delete & recreate) the afterlife world
+- **lifestealz.admin.afterlife.info** - View afterlife world status
+ - **lifestealz.admin.afterlife.invload** - Load stored inventory profile for a player
+ - **lifestealz.admin.afterlife.invclear** - Clear stored inventory profile for a player
 
 <br>
 

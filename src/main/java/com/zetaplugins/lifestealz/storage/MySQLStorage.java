@@ -35,20 +35,47 @@ public final class MySQLStorage extends MySQLSyntaxStorage {
 
     @Override
     protected void migrateDatabase() {
-        try (
-                Connection connection = getConnection();
-                Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery(
-                        "SELECT COLUMN_NAME"
-                        + " FROM INFORMATION_SCHEMA.COLUMNS"
-                        + " WHERE TABLE_NAME = 'hearts'"
-                        + " AND COLUMN_NAME = 'firstJoin'"
-                )
-        ) {
-            if (!resultSet.next()) {
-                getPlugin().getLogger().info("Adding 'firstJoin' column to 'hearts' table.");
-                statement.executeUpdate("ALTER TABLE hearts ADD COLUMN firstJoin INTEGER DEFAULT 0");
+        try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
+            
+            // Check for firstJoin column
+            try (ResultSet resultSet = statement.executeQuery(
+                    "SELECT COLUMN_NAME"
+                    + " FROM INFORMATION_SCHEMA.COLUMNS"
+                    + " WHERE TABLE_NAME = 'hearts'"
+                    + " AND COLUMN_NAME = 'firstJoin'"
+            )) {
+                if (!resultSet.next()) {
+                    getPlugin().getLogger().info("Adding 'firstJoin' column to 'hearts' table.");
+                    statement.executeUpdate("ALTER TABLE hearts ADD COLUMN firstJoin BIGINT DEFAULT 0");
+                }
             }
+            
+            // Check for lifeState column
+            try (ResultSet resultSet = statement.executeQuery(
+                    "SELECT COLUMN_NAME"
+                    + " FROM INFORMATION_SCHEMA.COLUMNS"
+                    + " WHERE TABLE_NAME = 'hearts'"
+                    + " AND COLUMN_NAME = 'lifeState'"
+            )) {
+                if (!resultSet.next()) {
+                    getPlugin().getLogger().info("Adding 'lifeState' column to 'hearts' table.");
+                    statement.executeUpdate("ALTER TABLE hearts ADD COLUMN lifeState VARCHAR(16) DEFAULT 'ALIVE'");
+                }
+            }
+            
+            // Check for afterlifeReleaseTime column
+            try (ResultSet resultSet = statement.executeQuery(
+                    "SELECT COLUMN_NAME"
+                    + " FROM INFORMATION_SCHEMA.COLUMNS"
+                    + " WHERE TABLE_NAME = 'hearts'"
+                    + " AND COLUMN_NAME = 'afterlifeReleaseTime'"
+            )) {
+                if (!resultSet.next()) {
+                    getPlugin().getLogger().info("Adding 'afterlifeReleaseTime' column to 'hearts' table.");
+                    statement.executeUpdate("ALTER TABLE hearts ADD COLUMN afterlifeReleaseTime BIGINT DEFAULT 0");
+                }
+            }
+            
         } catch (SQLException e) {
             getPlugin().getLogger().log(Level.SEVERE, "Failed to migrate database: ", e);
         }

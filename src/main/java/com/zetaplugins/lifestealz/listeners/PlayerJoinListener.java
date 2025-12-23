@@ -39,8 +39,39 @@ public final class PlayerJoinListener implements Listener {
 
         PlayerData playerData = loadOrCreatePlayerData(player, storage, plugin.getConfig().getInt("startHearts", 10));
         LifeStealZ.setMaxHealth(player, playerData.getMaxHealth());
+        
+        // Handle afterlife on login
+        if (plugin.getConfig().getBoolean("afterlife.enabled", false) && playerData.isAfterlife()) {
+            // Check if they should still be in afterlife
+            if (System.currentTimeMillis() >= playerData.getAfterlifeReleaseTime()) {
+                // Time expired, release them
+                plugin.getAfterlifeManager().releaseFromAfterlife(player);
+            } else {
+                // Teleport back to afterlife
+                org.bukkit.Location afterlifeSpawn = plugin.getAfterlifeManager().getWorldManager().getSpawnLocation();
+                if (afterlifeSpawn != null) {
+                    player.teleport(afterlifeSpawn);
+                    long remainingSeconds = (playerData.getAfterlifeReleaseTime() - System.currentTimeMillis()) / 1000;
+                    player.sendMessage("§7You are still in the Afterlife. Remaining time: §e" + formatTime(remainingSeconds));
+                }
+            }
+        }
 
         notifyOpAboutUpdate(player);
+    }
+    
+    private String formatTime(long seconds) {
+        long hours = seconds / 3600;
+        long minutes = (seconds % 3600) / 60;
+        long secs = seconds % 60;
+        
+        if (hours > 0) {
+            return String.format("%dh %dm", hours, minutes);
+        } else if (minutes > 0) {
+            return String.format("%dm %ds", minutes, secs);
+        } else {
+            return String.format("%ds", secs);
+        }
     }
 
     private PlayerData loadOrCreatePlayerData(Player player, Storage storage, int startHearts) {

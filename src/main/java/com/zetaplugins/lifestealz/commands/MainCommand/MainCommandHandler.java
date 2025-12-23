@@ -31,6 +31,7 @@ public final class MainCommandHandler implements CommandExecutor {
         commands.put("checkbypass", new BypassStatusSubCommand(plugin));
         commands.put("dev", new DevSubCommand(plugin));
         commands.put("debug", new DebugSubCommand(plugin));
+        commands.put("afterlife", new AfterlifeSubCommand(plugin));
     }
 
     @Override

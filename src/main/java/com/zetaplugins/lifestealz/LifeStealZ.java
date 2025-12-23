@@ -1,6 +1,7 @@
 package com.zetaplugins.lifestealz;
 
 import com.zetaplugins.lifestealz.util.*;
+import com.zetaplugins.lifestealz.afterlife.AfterlifeManager;
 import com.zetaplugins.lifestealz.util.revive.ReviveTaskManager;
 import com.zetaplugins.zetacore.ZetaCorePlugin;
 import com.zetaplugins.zetacore.services.bStats.Metrics;
@@ -47,6 +48,7 @@ public final class LifeStealZ extends ZetaCorePlugin {
     private AsyncTaskManager asyncTaskManager;
     private ReviveBeaconEffectManager reviveBeaconEffectManager;
     private ReviveTaskManager reviveTaskManager;
+    private AfterlifeManager afterlifeManager;
     private final boolean hasWorldGuard = Bukkit.getPluginManager().getPlugin("WorldGuard") != null;
     private final boolean hasPlaceholderApi = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
     private final boolean hasGeyser = Bukkit.getPluginManager().getPlugin("floodgate") != null;
@@ -101,6 +103,15 @@ public final class LifeStealZ extends ZetaCorePlugin {
 
         eliminatedPlayersCache = new EliminatedPlayersCache(this);
         offlinePlayerCache = new OfflinePlayerCache(this);
+        
+        // Initialize afterlife system
+        afterlifeManager = new AfterlifeManager(this);
+        afterlifeManager.getWorldManager().init();
+        
+        // Start afterlife timer task (runs every second)
+        Bukkit.getScheduler().runTaskTimer(this, () -> {
+            afterlifeManager.checkAndReleaseExpiredPlayers();
+        }, 20L, 20L);
 
         List<String> registeredCommands = new AutoCommandRegistrar(this, PACKAGE_PREFIX).registerAllCommands();
         getLogger().info("Registered " + registeredCommands.size() + " commands");
@@ -211,6 +222,10 @@ public final class LifeStealZ extends ZetaCorePlugin {
 
     public ConfigManager getConfigManager() {
         return configManager;
+    }
+    
+    public AfterlifeManager getAfterlifeManager() {
+        return afterlifeManager;
     }
 
     private Storage createPlayerDataStorage() {

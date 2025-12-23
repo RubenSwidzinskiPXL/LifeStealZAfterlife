@@ -98,6 +98,16 @@ noHeartUseWithBypass: "&cYou can't use hearts with bypass permission!"
 bypassStatusActive: "&7Bypass permission is &aactive &7for %player%."
 bypassStatusInactive: "&7Bypass permission is &cinactive &7for %player%."
 debugUploadConfirm: "\n <#8b73f6>&lUploading Debug Report&r\n\n&7 Are you sure you want to upload the debug report? By confirming, you accept our <u><click:OPEN_URL:https://debug.zetaplugins.com/privacy>Privacy Policy</click></u>.\n\n <#8b73f6><click:RUN_COMMAND:%command%>[Click Here]</click> &r&8or run <u>%command%</u>\n"
+
+# === AFTERLIFE MESSAGES ===
+afterlifeEnter: "&c☠ You have entered the Afterlife. You will be released in &e%time%&c."
+afterlifeRelease: "&aYou have been revived! You now have &e%hearts% &ahearts."
+noHeartUseInAfterlife: "&cYou cannot use hearts in the Afterlife!"
+# Death tag shown before chat messages from afterlife players
+# The entire message (including rank/prefix) will appear in dark grey
+# Examples: "&8[☠]&7" or "&7[DEAD]&8" or "&8†&7" or "&8[GHOST]&7"
+afterlifeDeathTag: "&8[☠]&7"
+
 debugFailedUpload: "&cFailed to upload debug report!"
 debugUploadSuccess: "&8 [&a✔&8] &7Debug report uploaded successfully! You can view it here:\n <u><#8b73f6><click:OPEN_URL:%url%>%url%</click></u>\n"
 debugFailedToCreateFile: "&cFailed to create debug report file: %error%"
