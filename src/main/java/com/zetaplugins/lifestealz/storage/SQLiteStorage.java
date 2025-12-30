@@ -28,6 +28,7 @@ public final class SQLiteStorage extends SQLStorage {
             boolean hasFirstJoin = false;
             boolean hasLifeState = false;
             boolean hasAfterlifeReleaseTime = false;
+            boolean hasPrestigeCount = false;
 
             while (resultSet.next()) {
                 String columnName = resultSet.getString("name");
@@ -37,6 +38,8 @@ public final class SQLiteStorage extends SQLStorage {
                     hasLifeState = true;
                 } else if ("afterlifeReleaseTime".equalsIgnoreCase(columnName)) {
                     hasAfterlifeReleaseTime = true;
+                } else if ("prestigeCount".equalsIgnoreCase(columnName)) {
+                    hasPrestigeCount = true;
                 }
             }
 
@@ -53,6 +56,11 @@ public final class SQLiteStorage extends SQLStorage {
             if (!hasAfterlifeReleaseTime) {
                 getPlugin().getLogger().info("Adding 'afterlifeReleaseTime' column to 'hearts' table.");
                 statement.executeUpdate("ALTER TABLE hearts ADD COLUMN afterlifeReleaseTime INTEGER DEFAULT 0");
+            }
+            
+            if (!hasPrestigeCount) {
+                getPlugin().getLogger().info("Adding 'prestigeCount' column to 'hearts' table.");
+                statement.executeUpdate("ALTER TABLE hearts ADD COLUMN prestigeCount INTEGER DEFAULT 0");
             }
         } catch (SQLException e) {
             getPlugin().getLogger().log(Level.SEVERE, "Failed to migrate database: ", e);

@@ -35,9 +35,9 @@ public abstract class SQLStorage extends Storage {
                         .append("killedOtherPlayers MEDIUMINT UNSIGNED NOT NULL DEFAULT 0, ")
                         .append("firstJoin BIGINT UNSIGNED NOT NULL, ")
                         .append("lifeState VARCHAR(16) NOT NULL DEFAULT 'ALIVE', ")
-                        .append("afterlifeReleaseTime BIGINT NOT NULL DEFAULT 0")
-                        .append(");");
-                statement.executeUpdate(sql.toString());
+                        .append("afterlifeReleaseTime BIGINT NOT NULL DEFAULT 0, ")
+                        .append("prestigeCount SMALLINT UNSIGNED NOT NULL DEFAULT 0")
+                        .append(");");                statement.executeUpdate(sql.toString());
 
                 migrateDatabase();
             } catch (SQLException e) {
@@ -111,6 +111,11 @@ public abstract class SQLStorage extends Storage {
         } catch (Exception e) {
             playerData.setAfterlifeReleaseTime(0L);
         }
+        try {
+            playerData.setPrestigeCount(resultSet.getInt("prestigeCount"));
+        } catch (Exception e) {
+            playerData.setPrestigeCount(0);
+        }
         
         playerData.clearModifiedFields();
         return playerData;
@@ -163,8 +168,8 @@ public abstract class SQLStorage extends Storage {
      * @return True if the insert was successful, false otherwise
      */
     private boolean insertPlayerData(Connection connection, PlayerData playerData) {
-        final String insertQuery = "INSERT INTO hearts (uuid, name, maxhp, hasbeenRevived, craftedHearts, craftedRevives, killedOtherPlayers, firstJoin, lifeState, afterlifeReleaseTime) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        final String insertQuery = "INSERT INTO hearts (uuid, name, maxhp, hasbeenRevived, craftedHearts, craftedRevives, killedOtherPlayers, firstJoin, lifeState, afterlifeReleaseTime, prestigeCount) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement insertStmt = connection.prepareStatement(insertQuery)) {
             insertStmt.setString(1, playerData.getUuid());
@@ -177,6 +182,7 @@ public abstract class SQLStorage extends Storage {
             insertStmt.setLong(8, playerData.getFirstJoin());
             insertStmt.setString(9, playerData.getLifeState().name());
             insertStmt.setLong(10, playerData.getAfterlifeReleaseTime());
+            insertStmt.setInt(11, playerData.getPrestigeCount());
             insertStmt.executeUpdate();
 
             playerData.clearModifiedFields();
@@ -224,6 +230,9 @@ public abstract class SQLStorage extends Storage {
                     break;
                 case "afterlifeReleaseTime":
                     params.add(playerData.getAfterlifeReleaseTime());
+                    break;
+                case "prestigeCount":
+                    params.add(playerData.getPrestigeCount());
                     break;
             }
         }

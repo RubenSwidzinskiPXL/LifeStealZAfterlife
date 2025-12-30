@@ -107,6 +107,15 @@ public final class PapiExpansion extends PlaceholderExpansion {
                 long timeLeft = lastHeartUse + heartCooldownTime - now;
                 return TimeFormatter.formatDuration(timeLeft);
             }
+            case "prestige_count": {
+                PlayerData playerData = plugin.getStorage().load(player.getUniqueId());
+                return String.valueOf(playerData.getPrestigeCount());
+            }
+            case "prestige": {
+                PlayerData playerData = plugin.getStorage().load(player.getUniqueId());
+                int prestigeCount = playerData.getPrestigeCount();
+                return prestigeCount > 0 ? String.valueOf(prestigeCount) : "None";
+            }
         }
 
         return "InvalidPlaceholder";

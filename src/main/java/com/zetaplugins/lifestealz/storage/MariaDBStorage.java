@@ -76,6 +76,19 @@ public final class MariaDBStorage extends MySQLSyntaxStorage {
                 }
             }
             
+            // Check for prestigeCount column
+            try (ResultSet resultSet = statement.executeQuery(
+                    "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS"
+                            + " WHERE TABLE_SCHEMA = DATABASE()"
+                            + " AND TABLE_NAME = 'hearts'"
+                            + " AND COLUMN_NAME = 'prestigeCount'"
+            )) {
+                if (!resultSet.next()) {
+                    getPlugin().getLogger().info("Adding 'prestigeCount' column to 'hearts' table.");
+                    statement.executeUpdate("ALTER TABLE hearts ADD COLUMN prestigeCount SMALLINT UNSIGNED DEFAULT 0");
+                }
+            }
+            
         } catch (SQLException e) {
             getPlugin().getLogger().log(Level.SEVERE, "Failed to migrate database: ", e);
         }

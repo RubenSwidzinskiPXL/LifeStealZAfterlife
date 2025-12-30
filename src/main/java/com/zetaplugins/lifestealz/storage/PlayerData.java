@@ -17,6 +17,7 @@ public class PlayerData {
     private long firstJoin;
     private LifeState lifeState = LifeState.ALIVE;
     private long afterlifeReleaseTime = 0L;
+    private int prestigeCount = 0;
 
     private final Set<String> modifiedFields = new HashSet<>(); // Track modified fields
 
@@ -131,6 +132,17 @@ public class PlayerData {
 
     public boolean isAlive() {
         return lifeState == LifeState.ALIVE;
+    }
+
+    public int getPrestigeCount() {
+        return prestigeCount;
+    }
+
+    public void setPrestigeCount(int prestigeCount) {
+        if (this.prestigeCount != prestigeCount) {
+            this.prestigeCount = prestigeCount;
+            modifiedFields.add("prestigeCount");
+        }
     }
 
     public boolean hasChanges() {

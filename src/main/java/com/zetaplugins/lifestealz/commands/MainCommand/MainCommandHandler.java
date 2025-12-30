@@ -29,6 +29,7 @@ public final class MainCommandHandler implements CommandExecutor {
         commands.put("data", new DataSubCommand(plugin));
         commands.put("graceperiod", new GracePeriodSubcommand(plugin));
         commands.put("checkbypass", new BypassStatusSubCommand(plugin));
+        commands.put("prestige", new PrestigeSubCommand(plugin));
         commands.put("dev", new DevSubCommand(plugin));
         commands.put("debug", new DebugSubCommand(plugin));
         commands.put("afterlife", new AfterlifeSubCommand(plugin));

@@ -95,6 +95,9 @@ permissions:
     lifestealz.viewhearts:
         description: allows to view other players max hearts
         default: true
+    lifestealz.prestige:
+        description: allows player to prestige
+        default: true
     lifestealz.maxhearts:
         description: set the max hearts
     lifestealz.bypass:
@@ -103,3 +106,9 @@ permissions:
     lifestealz.admin.bypasscheck:
         description: Check other players' and your own bypass status
         default: op
+    lifestealz.admin.prestige:
+        description: Manage prestige levels (set, reset, get)
+        default: op
+    lifestealz.prestige:
+        description: allows players to prestige
+        default: true

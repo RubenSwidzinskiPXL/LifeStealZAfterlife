@@ -292,3 +292,25 @@ afterlife:
     radius: 64
     height: 64
   # End portals are disabled for afterlife players
+
+# === PRESTIGE SETTINGS ===
+
+prestige:
+  # Enable or disable the prestige system
+  enabled: true
+  
+  # The minimum amount of hearts a player needs to prestige
+  min-hearts: 20
+  
+  # The amount of hearts a player should have after prestiging
+  reset-hearts: 10
+  
+  # The maximum amount of prestiges a player can achieve
+  max-prestiges: 50
+  
+  # Whether to broadcast prestige to all players
+  broadcast: true
+  
+  # The message to broadcast when a player prestiges
+  # Use %player% and %prestige_level% as placeholders
+  broadcast-message: "&b%player% &ehas reached &b[Prestige %prestige_level%]&e!"
