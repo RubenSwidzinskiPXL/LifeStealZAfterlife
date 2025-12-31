@@ -37,7 +37,7 @@ public final class PrestigeSubCommand implements SubCommand {
             var provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
             if (provider != null) {
                 this.luckPerms = provider.getProvider();
-                this.prestigePermissionManager = new PrestigePermissionManager(luckPerms, plugin.getLogger());
+                this.prestigePermissionManager = new PrestigePermissionManager(luckPerms, plugin.getLogger(), config);
                 plugin.getLogger().info("LuckPerms integration enabled for prestige system (with multiplier permissions)");
             }
         } catch (Exception e) {

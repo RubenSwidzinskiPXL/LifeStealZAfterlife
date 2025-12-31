@@ -5,6 +5,7 @@ import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.Node;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.concurrent.CompletableFuture;
@@ -35,21 +36,22 @@ import java.util.logging.Logger;
 public class PrestigePermissionManager {
     
     private static final String PERMISSION_PREFIX = "lifestealz.prestige.multiplier.";
-    private static final double BASE_MULTIPLIER = 1.0;
-    private static final double MULTIPLIER_INCREMENT = 0.05; // 5% per prestige level
     
     private final LuckPerms luckPerms;
     private final Logger logger;
+    private final FileConfiguration config;
     
     /**
      * Creates a new PrestigePermissionManager.
      * 
      * @param luckPerms The LuckPerms API instance
      * @param logger Logger for debug messages
+     * @param config Configuration file for reading multiplier settings
      */
-    public PrestigePermissionManager(LuckPerms luckPerms, Logger logger) {
+    public PrestigePermissionManager(LuckPerms luckPerms, Logger logger, FileConfiguration config) {
         this.luckPerms = luckPerms;
         this.logger = logger;
+        this.config = config;
     }
     
     /**
@@ -115,17 +117,19 @@ public class PrestigePermissionManager {
     
     /**
      * Calculates the multiplier permission string from a prestige level.
+     * Reads formula from config: prestige.multiplier.base and prestige.multiplier.increment
      * 
-     * <p><b>Default Formula:</b> {@code 1.0 + (level * 0.05)}</p>
-     * 
-     * <p>You can customize this formula by changing the {@link #BASE_MULTIPLIER}
-     * and {@link #MULTIPLIER_INCREMENT} constants.</p>
+     * <p><b>Default Formula:</b> {@code base + (level * increment)}<br>
+     * Where base = 1.0 and increment = 0.05</p>
      * 
      * @param prestigeLevel The prestige level
      * @return The permission string (e.g., "lifestealz.prestige.multiplier.105")
      */
     private String calculateMultiplierPermission(int prestigeLevel) {
-        double multiplier = BASE_MULTIPLIER + (prestigeLevel * MULTIPLIER_INCREMENT);
+        double baseMultiplier = config.getDouble("prestige.multiplier.base", 1.0);
+        double increment = config.getDouble("prestige.multiplier.increment", 0.05);
+        
+        double multiplier = baseMultiplier + (prestigeLevel * increment);
         int multiplierValue = (int) Math.round(multiplier * 100);
         return PERMISSION_PREFIX + multiplierValue;
     }
@@ -138,6 +142,9 @@ public class PrestigePermissionManager {
      * a PrestigePermissionManager instance. It's designed to be used by
      * external plugins.</p>
      * 
+     * <p>If multiple multiplier permissions exist (e.g., due to manual permission grants),
+     * this method returns the <b>highest</b> multiplier value.</p>
+     * 
      * @param player The player to check
      * @return The multiplier value (e.g., 1.05, 1.50, 2.00), or 1.0 if no multiplier found
      */
@@ -145,17 +152,17 @@ public class PrestigePermissionManager {
         return player.getEffectivePermissions().stream()
             .map(perm -> perm.getPermission())
             .filter(perm -> perm.startsWith(PERMISSION_PREFIX))
-            .findFirst()
-            .map(perm -> {
+            .mapToDouble(perm -> {
                 try {
                     String multiplierStr = perm.replace(PERMISSION_PREFIX, "");
                     // Convert "105" → 1.05, "150" → 1.50, "200" → 2.00
                     return Double.parseDouble(multiplierStr) / 100.0;
                 } catch (NumberFormatException e) {
-                    return BASE_MULTIPLIER;
+                    return 1.0; // Default if parsing fails
                 }
             })
-            .orElse(BASE_MULTIPLIER);
+            .max() // Get the highest multiplier if multiple exist
+            .orElse(1.0); // Default: no multiplier
     }
     
     /**
@@ -185,6 +192,9 @@ public class PrestigePermissionManager {
      * Gets the permission string that would be granted for a given prestige level.
      * Useful for administrative commands or debugging.
      * 
+     * <p><b>Note:</b> This method uses default config values (1.0 base, 0.05 increment)
+     * for static access. For actual permission grants, the config-based instance method is used.</p>
+     * 
      * @param prestigeLevel The prestige level to check
      * @return The permission string
      */
@@ -192,7 +202,8 @@ public class PrestigePermissionManager {
         if (prestigeLevel <= 0) {
             return "none";
         }
-        double multiplier = BASE_MULTIPLIER + (prestigeLevel * MULTIPLIER_INCREMENT);
+        // Use default values for static method (actual grants use config)
+        double multiplier = 1.0 + (prestigeLevel * 0.05);
         int multiplierValue = (int) Math.round(multiplier * 100);
         return PERMISSION_PREFIX + multiplierValue;
     }

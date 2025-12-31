@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import com.zetaplugins.lifestealz.LifeStealZ;
 import com.zetaplugins.lifestealz.util.MessageUtils;
+import com.zetaplugins.lifestealz.util.EliminationUtil;
 import com.zetaplugins.lifestealz.util.customitems.CustomItemManager;
 import com.zetaplugins.lifestealz.storage.PlayerData;
 
@@ -146,25 +147,8 @@ public final class WithdrawCommand implements CommandExecutor, TabCompleter {
                 player.getInventory().addItem(CustomItemManager.createHeart());
             }
 
-            playerdata.setMaxHealth(0.0);
-            plugin.getStorage().save(playerdata);
-
-            Component kickmsg = MessageUtils.getAndFormatMsg(
-                    false,
-                    "eliminatedjoin",
-                    "&cYou don't have any hearts left!"
-            );
-            player.kick(kickmsg, PlayerKickEvent.Cause.BANNED);
-
-            if (plugin.getConfig().getBoolean("announceElimination")) {
-                Component elimAnnouncementMsg = MessageUtils.getAndFormatMsg(
-                        true,
-                        "eliminateionAnnouncementNature",
-                        "&c%player% &7has been eliminated!",
-                        new MessageUtils.Replaceable("%player%", player.getName())
-                );
-                Bukkit.broadcast(elimAnnouncementMsg);
-            }
+            // Use EliminationUtil to handle afterlife/ban properly
+            EliminationUtil.eliminatePlayer(plugin, player, playerdata, true);
 
             return false;
         }

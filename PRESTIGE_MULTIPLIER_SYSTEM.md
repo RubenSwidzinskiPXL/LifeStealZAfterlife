@@ -489,29 +489,58 @@ Removes prestige multiplier permission from a player (async).
 
 ## Configuration
 
-### Changing the Multiplier Formula
+### Multiplier Settings in Config
 
-Edit [`PrestigePermissionManager.java`](src/main/java/com/zetaplugins/lifestealz/util/PrestigePermissionManager.java):
+The multiplier formula is now **fully configurable** in `config.yml`:
 
-```java
-private static final double BASE_MULTIPLIER = 1.0;
-private static final double MULTIPLIER_INCREMENT = 0.05; // Change this!
-
-// Examples:
-// 0.10 = 10% per level (1.10x, 1.20x, 1.30x...)
-// 0.03 = 3% per level (1.03x, 1.06x, 1.09x...)
-// 0.15 = 15% per level (1.15x, 1.30x, 1.45x...)
+```yaml
+prestige:
+  multiplier:
+    # Base multiplier (what players start with at prestige 0)
+    # Default: 1.0 (no bonus)
+    base: 1.0
+    
+    # How much the multiplier increases per prestige level
+    # Default: 0.05 (5% increase per level)
+    increment: 0.05
 ```
 
-**After changing:**
-1. Rebuild plugin: `mvn clean package`
-2. Restart server
-3. Existing players keep old permissions
-4. Use `/lifestealz prestige set <player> <level>` to update
+### Changing the Multiplier
 
-### Custom Formula (Advanced)
+**Edit `config.yml`:**
 
-Replace the `calculateMultiplierPermission()` method for custom formulas:
+```yaml
+# Example 1: 10% per level
+prestige:
+  multiplier:
+    base: 1.0
+    increment: 0.10  # Prestige 1 = 1.10x, Prestige 5 = 1.50x, Prestige 10 = 2.00x
+
+# Example 2: 3% per level (slower progression)
+prestige:
+  multiplier:
+    base: 1.0
+    increment: 0.03  # Prestige 1 = 1.03x, Prestige 5 = 1.15x, Prestige 10 = 1.30x
+
+# Example 3: Start at 1.10x base
+prestige:
+  multiplier:
+    base: 1.10
+    increment: 0.05  # Prestige 1 = 1.15x, Prestige 5 = 1.35x, Prestige 10 = 1.60x
+```
+
+**After changing config:**
+1. Restart server (or `/lifestealz reload` if available)
+2. New prestiges use new formula automatically
+3. Update existing players: `/lifestealz prestige set <player> <level>`
+
+### Custom Formula (Advanced - Code-Based)
+
+For non-linear formulas (exponential, tiered, etc.), edit the code:
+
+**File:** `src/main/java/com/zetaplugins/lifestealz/util/PrestigePermissionManager.java`
+
+Replace the `calculateMultiplierPermission()` method:
 
 ```java
 // Example: Exponential growth
@@ -535,6 +564,11 @@ private String calculateMultiplierPermission(int prestigeLevel) {
     return PERMISSION_PREFIX + multiplierValue;
 }
 ```
+
+**After code changes:**
+1. Rebuild: `mvn clean package`
+2. Replace JAR and restart server
+3. Update existing players: `/lifestealz prestige set <player> <level>`
 
 ---
 
