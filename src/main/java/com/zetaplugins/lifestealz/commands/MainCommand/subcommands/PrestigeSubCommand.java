@@ -14,6 +14,7 @@ import com.zetaplugins.lifestealz.LifeStealZ;
 import com.zetaplugins.lifestealz.commands.SubCommand;
 import com.zetaplugins.lifestealz.util.MessageUtils;
 import com.zetaplugins.lifestealz.util.commands.CommandUtils;
+import com.zetaplugins.lifestealz.util.PrestigePermissionManager;
 import com.zetaplugins.lifestealz.storage.PlayerData;
 import com.zetaplugins.lifestealz.storage.Storage;
 
@@ -24,6 +25,7 @@ public final class PrestigeSubCommand implements SubCommand {
     private final FileConfiguration config;
     private final Storage storage;
     private LuckPerms luckPerms;
+    private PrestigePermissionManager prestigePermissionManager;
 
     public PrestigeSubCommand(LifeStealZ plugin) {
         this.plugin = plugin;
@@ -35,10 +37,11 @@ public final class PrestigeSubCommand implements SubCommand {
             var provider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
             if (provider != null) {
                 this.luckPerms = provider.getProvider();
-                plugin.getLogger().info("LuckPerms integration enabled for prestige system");
+                this.prestigePermissionManager = new PrestigePermissionManager(luckPerms, plugin.getLogger());
+                plugin.getLogger().info("LuckPerms integration enabled for prestige system (with multiplier permissions)");
             }
         } catch (Exception e) {
-            plugin.getLogger().warning("LuckPerms not found - prestige groups won't be auto-assigned");
+            plugin.getLogger().warning("LuckPerms not found - prestige groups and multipliers won't be auto-assigned");
         }
     }
 
@@ -232,6 +235,18 @@ public final class PrestigeSubCommand implements SubCommand {
                 plugin.getLogger().warning("Failed to update LuckPerms group for " + player.getName() + ": " + e.getMessage());
             }
         });
+        
+        // ✅ Update prestige multiplier permission (NEW!)
+        if (prestigePermissionManager != null) {
+            prestigePermissionManager.setPrestigeMultiplier(player, newPrestige)
+                .thenAccept(success -> {
+                    if (success) {
+                        String permName = PrestigePermissionManager.getPermissionForLevel(newPrestige);
+                        plugin.getLogger().info("Updated prestige multiplier for " + player.getName() + 
+                                ": " + permName + " (" + PrestigePermissionManager.getFormattedMultiplier((Player) player) + ")");
+                    }
+                });
+        }
     }
 
     /**
